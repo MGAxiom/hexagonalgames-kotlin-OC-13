@@ -8,4 +8,9 @@
 
   <style name="Theme.HexagonalGames"
     parent="Base.Theme.HexagonalGames" />
+
+  <style name="AppAuthUI" parent="Base.Theme.HexagonalGames">
+    <item name="android:paddingTop">4dp</item>
+  </style>
+
 </resources>
