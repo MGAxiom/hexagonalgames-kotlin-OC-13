@@ -3,18 +3,16 @@ plugins {
   alias(libs.plugins.kotlin)
   alias(libs.plugins.ksp)
   alias(libs.plugins.hilt)
-  alias(libs.plugins.googleGmsGoogleServices)
-  alias(libs.plugins.compose.compiler)
 }
 
 android {
   namespace = "com.openclassrooms.hexagonal.games"
-  compileSdk = 35
+  compileSdk = 34
 
   defaultConfig {
     applicationId = "com.openclassrooms.hexagonal.games"
     minSdk = 24
-    targetSdk = 35
+    targetSdk = 34
     versionCode = 1
     versionName = "1.0"
 
@@ -48,8 +46,6 @@ dependencies {
 
   //DI
   implementation(libs.hilt)
-    implementation(libs.firebase.analytics)
-  implementation(libs.firebase.auth)
   ksp(libs.hilt.compiler)
   implementation(libs.hilt.navigation.compose)
 
@@ -71,14 +67,6 @@ dependencies {
   
   implementation(libs.coil.compose)
   implementation(libs.accompanist.permissions)
-
-  //Firebase BoM
-  implementation(platform(libs.firebase.bom))
-
-  //Firebase
-  implementation(libs.google.firebase.auth)
-  implementation(libs.firebase.ui.auth)
-
 
   testImplementation(libs.junit)
   androidTestImplementation(libs.ext.junit)
