@@ -38,16 +38,26 @@ class MainActivity : ComponentActivity() {
     private var currentUser: FirebaseUser? by mutableStateOf(FirebaseAuth.getInstance().currentUser)
 
     private fun onSignInResult(result: FirebaseAuthUIAuthenticationResult) {
-        val response = result.idpResponse
         if (result.resultCode == RESULT_OK) {
             // Successfully signed in
             val user = FirebaseAuth.getInstance().currentUser
-            // ...
+            this.currentUser = user
+
+            if (user != null) {
+                setupMainContent()
+            }
         } else {
-            // Sign in failed. If response is null the user canceled the
-            // sign-in flow using the back button. Otherwise check
-            // response.getError().getErrorCode() and handle the error.
-            // ...
+
+            val response = result.idpResponse
+            if (response == null) {
+
+                if (FirebaseAuth.getInstance().currentUser == null) {
+                    signInLauncher.launch(signInIntent)
+                }
+            } else {
+                // Handle other errors
+                // response.getError().getErrorCode()
+            }
         }
     }
 
@@ -61,31 +71,56 @@ class MainActivity : ComponentActivity() {
         AuthUI.IdpConfig.EmailBuilder().build(),
     )
 
-    val signInIntent = AuthUI.getInstance()
-        .createSignInIntentBuilder()
-        .setCredentialManagerEnabled(true)
-        .setAvailableProviders(providers)
-        .setTheme(R.style.AppAuthUI)
-        .build()
+    val signInIntent by lazy {
+        AuthUI.getInstance()
+            .createSignInIntentBuilder()
+            .setCredentialManagerEnabled(true)
+            .setAvailableProviders(providers)
+            .setTheme(R.style.AppAuthUI)
+            .build()
+    }
 
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        analytics = Firebase.analytics
-
-        setContent {
-            val navController = rememberNavController()
-
-            HexagonalGamesTheme {
-                HexagonalGamesNavHost(navHostController = navController)
+    private val authStateListener = FirebaseAuth.AuthStateListener { firebaseAuth ->
+        val newAuthUser = firebaseAuth.currentUser
+        if (this.currentUser != newAuthUser) {
+            this.currentUser = newAuthUser
+            if (newAuthUser != null) {
+                setupMainContent()
+            } else {
+                if (contentResolver != null && !isFinishing) {
+                    signInLauncher.launch(signInIntent)
+                }
             }
-        }
-        if (FirebaseAuth.getInstance().currentUser == null) {
+        } else if (newAuthUser == null && !isFinishing) {
             signInLauncher.launch(signInIntent)
         }
     }
 
+    override fun onStart() {
+        super.onStart()
+        FirebaseAuth.getInstance().addAuthStateListener(authStateListener)
+        if (FirebaseAuth.getInstance().currentUser == null) {
+            if (!isFinishing) {
+                signInLauncher.launch(signInIntent)
+            }
+        } else {
+            setupMainContent()
+        }
+    }
+
+    private fun setupMainContent() {
+        setContent {
+            val navController = rememberNavController()
+            HexagonalGamesTheme {
+                HexagonalGamesNavHost(navHostController = navController)
+            }
+        }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        FirebaseAuth.getInstance().removeAuthStateListener(authStateListener)
+    }
 }
 
 @Composable
@@ -104,6 +139,9 @@ fun HexagonalGamesNavHost(navHostController: NavHostController) {
                 },
                 onFABClick = {
                     navHostController.navigate(Screen.AddPost.route)
+                },
+                onAccountClick = {
+                    navHostController.navigate(Screen.Account.route)
                 }
             )
         }

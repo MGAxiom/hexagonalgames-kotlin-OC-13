@@ -52,9 +52,10 @@ import com.openclassrooms.hexagonal.games.ui.theme.HexagonalGamesTheme
 fun HomefeedScreen(
   modifier: Modifier = Modifier,
   viewModel: HomefeedViewModel = hiltViewModel(),
-  onPostClick: (Post) -> Unit = {},
-  onSettingsClick: () -> Unit = {},
-  onFABClick: () -> Unit = {},
+  onPostClick: (Post) -> Unit,
+  onSettingsClick: () -> Unit,
+  onAccountClick: () -> Unit,
+  onFABClick: () -> Unit,
 ) {
   var showMenu by rememberSaveable { mutableStateOf(false) }
   
@@ -83,6 +84,16 @@ fun HomefeedScreen(
               text = {
                 Text(
                   text = stringResource(id = R.string.action_settings)
+                )
+              }
+            )
+            DropdownMenuItem(
+              onClick = {
+                onAccountClick()
+              },
+              text = {
+                Text(
+                  text = stringResource(id = R.string.action_account)
                 )
               }
             )
