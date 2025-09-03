@@ -21,6 +21,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.openclassrooms.hexagonal.games.R
 import com.openclassrooms.hexagonal.games.screen.Screen
+import com.openclassrooms.hexagonal.games.screen.account.AccountScreen
 import com.openclassrooms.hexagonal.games.screen.ad.AddScreen
 import com.openclassrooms.hexagonal.games.screen.homefeed.HomefeedScreen
 import com.openclassrooms.hexagonal.games.screen.settings.SettingsScreen
@@ -154,6 +155,15 @@ fun HexagonalGamesNavHost(navHostController: NavHostController) {
         composable(route = Screen.Settings.route) {
             SettingsScreen(
                 onBackClick = { navHostController.navigateUp() }
+            )
+        }
+        composable(route = Screen.Account.route) {
+            AccountScreen(
+                onBackClick = { navHostController.navigateUp() },
+                onLoggedOut = { navHostController.popBackStack(Screen.Homefeed.route, inclusive = false, saveState = false) },
+                onAccountDeleted = {
+                    navHostController.popBackStack(Screen.Homefeed.route, inclusive = false, saveState = false)
+                }
             )
         }
     }
