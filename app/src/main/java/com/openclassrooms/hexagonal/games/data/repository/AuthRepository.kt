@@ -1,5 +1,6 @@
 package com.openclassrooms.hexagonal.games.data.repository
 
+import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
@@ -26,6 +27,7 @@ class AuthRepository @Inject constructor(
                     onSuccess()
                 } else {
                     task.exception?.let { onFailure(it) }
+                    Log.v("AuthRepository", "deleteCurrentUserAccount: ${task.exception}")
                 }
             } ?: onFailure(IllegalStateException("User not found to delete."))
     }

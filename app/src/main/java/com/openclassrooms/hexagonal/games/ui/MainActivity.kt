@@ -1,6 +1,7 @@
 package com.openclassrooms.hexagonal.games.ui
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.Composable
@@ -14,9 +15,7 @@ import androidx.navigation.compose.rememberNavController
 import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
 import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult
-import com.google.firebase.Firebase
 import com.google.firebase.analytics.FirebaseAnalytics
-import com.google.firebase.analytics.analytics
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.openclassrooms.hexagonal.games.R
@@ -37,30 +36,8 @@ class MainActivity : ComponentActivity() {
 
     private lateinit var analytics: FirebaseAnalytics
     private var currentUser: FirebaseUser? by mutableStateOf(FirebaseAuth.getInstance().currentUser)
-
-    private fun onSignInResult(result: FirebaseAuthUIAuthenticationResult) {
-        if (result.resultCode == RESULT_OK) {
-            // Successfully signed in
-            val user = FirebaseAuth.getInstance().currentUser
-            this.currentUser = user
-
-            if (user != null) {
-                setupMainContent()
-            }
-        } else {
-
-            val response = result.idpResponse
-            if (response == null) {
-
-                if (FirebaseAuth.getInstance().currentUser == null) {
-                    signInLauncher.launch(signInIntent)
-                }
-            } else {
-                // Handle other errors
-                // response.getError().getErrorCode()
-            }
-        }
-    }
+    private var isMainContentSet: Boolean by mutableStateOf(false)
+    private val TAG = "MainActivityAuth"
 
     private val signInLauncher = registerForActivityResult(
         FirebaseAuthUIActivityResultContract()
@@ -82,38 +59,59 @@ class MainActivity : ComponentActivity() {
     }
 
     private val authStateListener = FirebaseAuth.AuthStateListener { firebaseAuth ->
-        val newAuthUser = firebaseAuth.currentUser
-        if (this.currentUser != newAuthUser) {
-            this.currentUser = newAuthUser
-            if (newAuthUser != null) {
-                setupMainContent()
-            } else {
-                if (contentResolver != null && !isFinishing) {
-                    signInLauncher.launch(signInIntent)
+        val authUser = firebaseAuth.currentUser
+        Log.d(TAG, "AuthStateListener: User: ${authUser?.uid}, MainContentSet: $isMainContentSet")
+        if (this.currentUser != authUser) this.currentUser = authUser
+
+        if (authUser != null) {
+            if (!isMainContentSet) setupMainContent()
+        } else {
+            if (isMainContentSet) isMainContentSet = false
+            if (!isFinishing) signInLauncher.launch(signInIntent)
+        }
+    }
+
+    private fun onSignInResult(result: FirebaseAuthUIAuthenticationResult) {
+        if (result.resultCode == RESULT_OK) {
+            Log.d(TAG, "Sign-in successful. User: ${FirebaseAuth.getInstance().currentUser?.uid}")
+            this.currentUser = FirebaseAuth.getInstance().currentUser
+        } else {
+            val response = result.idpResponse
+            if (response == null) {
+                Log.d(TAG, "Sign-in cancelled by user.")
+                if (FirebaseAuth.getInstance().currentUser == null && !isFinishing && !isMainContentSet) {
+                    Log.d(
+                        TAG,
+                        "User cancelled, not logged in, content not set. Relying on AuthStateListener."
+                    )
                 }
+                return
             }
-        } else if (newAuthUser == null && !isFinishing) {
-            signInLauncher.launch(signInIntent)
         }
     }
 
     override fun onStart() {
         super.onStart()
         FirebaseAuth.getInstance().addAuthStateListener(authStateListener)
-        if (FirebaseAuth.getInstance().currentUser == null) {
-            if (!isFinishing) {
-                signInLauncher.launch(signInIntent)
-            }
-        } else {
-            setupMainContent()
-        }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        analytics = FirebaseAnalytics.getInstance(this)
     }
 
     private fun setupMainContent() {
         setContent {
             val navController = rememberNavController()
             HexagonalGamesTheme {
-                HexagonalGamesNavHost(navHostController = navController)
+                HexagonalGamesNavHost(
+                    navHostController = navController,
+                    activitySignInLauncher = {
+                        if (FirebaseAuth.getInstance().currentUser == null) {
+                            signInLauncher.launch(signInIntent)
+                        }
+                    }
+                )
             }
         }
     }
@@ -121,51 +119,6 @@ class MainActivity : ComponentActivity() {
     override fun onStop() {
         super.onStop()
         FirebaseAuth.getInstance().removeAuthStateListener(authStateListener)
-    }
-}
-
-@Composable
-fun HexagonalGamesNavHost(navHostController: NavHostController) {
-    NavHost(
-        navController = navHostController,
-        startDestination = Screen.Homefeed.route
-    ) {
-        composable(route = Screen.Homefeed.route) {
-            HomefeedScreen(
-                onPostClick = {
-                    //TODO
-                },
-                onSettingsClick = {
-                    navHostController.navigate(Screen.Settings.route)
-                },
-                onFABClick = {
-                    navHostController.navigate(Screen.AddPost.route)
-                },
-                onAccountClick = {
-                    navHostController.navigate(Screen.Account.route)
-                }
-            )
-        }
-        composable(route = Screen.AddPost.route) {
-            AddScreen(
-                onBackClick = { navHostController.navigateUp() },
-                onSaveClick = { navHostController.navigateUp() }
-            )
-        }
-        composable(route = Screen.Settings.route) {
-            SettingsScreen(
-                onBackClick = { navHostController.navigateUp() }
-            )
-        }
-        composable(route = Screen.Account.route) {
-            AccountScreen(
-                onBackClick = { navHostController.navigateUp() },
-                onLoggedOut = { navHostController.popBackStack(Screen.Homefeed.route, inclusive = false, saveState = false) },
-                onAccountDeleted = {
-                    navHostController.popBackStack(Screen.Homefeed.route, inclusive = false, saveState = false)
-                }
-            )
-        }
     }
 }
 
