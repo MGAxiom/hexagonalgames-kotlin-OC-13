@@ -21,24 +21,13 @@ class AccountViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(AccountUiState(currentUser = authRepository.getCurrentUser()))
     val uiState: StateFlow<AccountUiState> = _uiState.asStateFlow()
 
-    init {
-        // If you had a reactive way to get user updates from AuthRepository, you'd collect it here
-        // For example:
-        // viewModelScope.launch {
-        //     authRepository.getAuthStateFlow().collect { user -> // Assuming AuthRepository exposes this
-        //         _uiState.update { it.copy(currentUser = user) }
-        //     }
-        // }
-        // For now, refreshUser() can be called if needed, or rely on MainActivity's global listener.
-    }
-
     fun onLogout() {
         _uiState.update { it.copy(isLoading = true) }
-        authRepository.signOut() // This will trigger MainActivity's AuthStateListener
+        authRepository.signOut()
         _uiState.update {
             it.copy(
                 isLoading = false,
-                currentUser = null, // Reflect immediately in this VM's state
+                currentUser = null,
                 navigationEvent = NavigationEvent.LogoutCompleted
             )
         }
@@ -52,7 +41,7 @@ class AccountViewModel @Inject constructor(
                     _uiState.update {
                         it.copy(
                             isLoading = false,
-                            currentUser = null, // Reflect immediately
+                            currentUser = null,
                             navigationEvent = NavigationEvent.AccountDeletionCompleted
                         )
                     }
@@ -70,11 +59,11 @@ class AccountViewModel @Inject constructor(
         }
     }
 
-    fun onSignInRequested() {
-        if (_uiState.value.currentUser == null) {
-            _uiState.update { it.copy(navigationEvent = NavigationEvent.RequestActivitySignIn) }
-        }
-    }
+//    fun onSignInRequested() {
+//        if (_uiState.value.currentUser == null) {
+//            _uiState.update { it.copy(navigationEvent = NavigationEvent.RequestActivitySignIn) }
+//        }
+//    }
 
     fun consumeNavigationEvent() {
         _uiState.update { it.copy(navigationEvent = null) }

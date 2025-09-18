@@ -13,9 +13,11 @@
   <string name="hint_title">Title</string>
   <string name="hint_description">Description</string>
   <string name="action_save">Save</string>
+  <string name="action_photo_picker">Choose a picture</string>
   <string name="contentDescription_go_back">Go back</string>
   <string name="contentDescription_more">More</string>
   <string name="contentDescription_notification_icon">Icone de notification</string>
   <string name="error_title">Title not valid</string>
+  <string name="error_image">Invalid photo</string>
   <string name="default_web_client_id" translatable="false">webClientId.apps.googleusercontent.com</string>
 </resources>

@@ -13,8 +13,10 @@
   <string name="hint_title">Titre</string>
   <string name="hint_description">Description</string>
   <string name="action_save">Sauvegarder</string>
+  <string name="action_photo_picker">Choisir une photo</string>
   <string name="contentDescription_go_back">Retour</string>
   <string name="contentDescription_more">Plus</string>
   <string name="contentDescription_notification_icon">Notification icon</string>
   <string name="error_title">Titre non valide</string>
+  <string name="error_image">Photo non valide</string>
 </resources>

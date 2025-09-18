@@ -1,15 +1,23 @@
 package com.openclassrooms.hexagonal.games.screen.ad
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -20,155 +28,243 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.PreviewLightDark
-import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil.compose.AsyncImage
 import com.openclassrooms.hexagonal.games.R
 import com.openclassrooms.hexagonal.games.ui.theme.HexagonalGamesTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddScreen(
-  modifier: Modifier = Modifier,
-  viewModel: AddViewModel = hiltViewModel(),
-  onBackClick: () -> Unit,
-  onSaveClick: () -> Unit
+    modifier: Modifier = Modifier,
+    viewModel: AddViewModel = hiltViewModel(),
+    onBackClick: () -> Unit,
+    onSaveClick: () -> Unit
 ) {
-  Scaffold(
-    modifier = modifier,
-    topBar = {
-      TopAppBar(
-        title = {
-          Text(stringResource(id = R.string.add_fragment_label))
-        },
-        navigationIcon = {
-          IconButton(onClick = {
-            onBackClick()
-          }) {
-            Icon(
-              imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-              contentDescription = stringResource(id = R.string.contentDescription_go_back)
+    Scaffold(
+        modifier = modifier,
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(stringResource(id = R.string.add_fragment_label))
+                },
+                navigationIcon = {
+                    IconButton(onClick = {
+                        onBackClick()
+                    }) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(id = R.string.contentDescription_go_back)
+                        )
+                    }
+                }
             )
-          }
         }
-      )
+    ) { contentPadding ->
+        val post by viewModel.post.collectAsStateWithLifecycle()
+        val error by viewModel.error.collectAsStateWithLifecycle()
+
+        CreatePost(
+            modifier = Modifier.padding(contentPadding),
+            error = error,
+            title = post.title,
+            onTitleChanged = { viewModel.onAction(FormEvent.TitleChanged(it)) },
+            description = post.description ?: "",
+            onDescriptionChanged = { viewModel.onAction(FormEvent.DescriptionChanged(it)) },
+            onSaveClicked = {
+                viewModel.addPost()
+                onSaveClick()
+            },
+            onOpenPicker = {
+                //viewModel.onAction(FormEvent.PhotoUrlChanged())
+            },
+            onRemovePhoto = {},
+        )
     }
-  ) { contentPadding ->
-    val post by viewModel.post.collectAsStateWithLifecycle()
-    val error by viewModel.error.collectAsStateWithLifecycle()
-    
-    CreatePost(
-      modifier = Modifier.padding(contentPadding),
-      error = error,
-      title = post.title,
-      onTitleChanged = { viewModel.onAction(FormEvent.TitleChanged(it)) },
-      description = post.description ?: "",
-      onDescriptionChanged = { viewModel.onAction(FormEvent.DescriptionChanged(it)) },
-      onSaveClicked = {
-        viewModel.addPost()
-        onSaveClick()
-      }
-    )
-  }
 }
 
 @Composable
 private fun CreatePost(
-  modifier: Modifier = Modifier,
-  title: String,
-  onTitleChanged: (String) -> Unit,
-  description: String,
-  onDescriptionChanged: (String) -> Unit,
-  onSaveClicked: () -> Unit,
-  error: FormError?
+    modifier: Modifier = Modifier,
+    title: String,
+    onTitleChanged: (String) -> Unit,
+    description: String,
+    onDescriptionChanged: (String) -> Unit,
+    onSaveClicked: () -> Unit,
+    onOpenPicker: () -> Unit,
+    error: FormError?
 ) {
-  val scrollState = rememberScrollState()
-  
-  Column(
-    modifier = modifier
-      .padding(16.dp)
-      .fillMaxSize(),
-    horizontalAlignment = Alignment.CenterHorizontally
-  ) {
+    val scrollState = rememberScrollState()
+
     Column(
-      modifier = modifier
-        .fillMaxSize()
-        .weight(1f)
-        .verticalScroll(scrollState)
+        modifier = modifier
+            .padding(ITEM_PADDING_TOP.dp)
+            .fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-      OutlinedTextField(
-        modifier = Modifier
-          .padding(top = 16.dp)
-          .fillMaxWidth(),
-        value = title,
-        isError = error is FormError.TitleError,
-        onValueChange = { onTitleChanged(it) },
-        label = { Text(stringResource(id = R.string.hint_title)) },
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-        singleLine = true
-      )
-      if (error is FormError.TitleError) {
-        Text(
-          text = stringResource(id = error.messageRes),
-          color = MaterialTheme.colorScheme.error,
-        )
-      }
-      OutlinedTextField(
-        modifier = Modifier
-          .padding(top = 16.dp)
-          .fillMaxWidth(),
-        value = description,
-        onValueChange = { onDescriptionChanged(it) },
-        label = { Text(stringResource(id = R.string.hint_description)) },
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
-      )
+        var imageUri: Uri? by remember { mutableStateOf(null) }
+        val launcher =
+            rememberLauncherForActivityResult(contract = ActivityResultContracts.OpenDocument()) {
+                it?.let { uri ->
+                    imageUri = uri
+                }
+            }
+
+        Column(
+            modifier = modifier
+                .fillMaxSize()
+                .weight(1f)
+                .verticalScroll(scrollState)
+        ) {
+            OutlinedTextField(
+                modifier = Modifier
+                    .padding(top = ITEM_PADDING_TOP.dp)
+                    .fillMaxWidth(),
+                value = title,
+                isError = error is FormError.TitleError,
+                onValueChange = { onTitleChanged(it) },
+                label = { Text(stringResource(id = R.string.hint_title)) },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+                singleLine = true
+            )
+            if (error is FormError.TitleError) {
+                Text(
+                    text = stringResource(id = error.messageRes),
+                    color = MaterialTheme.colorScheme.error,
+                )
+            }
+            OutlinedTextField(
+                modifier = Modifier
+                    .padding(top = ITEM_PADDING_TOP.dp)
+                    .fillMaxWidth(),
+                value = description,
+                onValueChange = { onDescriptionChanged(it) },
+                label = { Text(stringResource(id = R.string.hint_description)) },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
+            )
+            Card(
+                modifier = Modifier
+                    .padding(top = ITEM_PADDING_TOP.dp)
+                    .height(CARD_IMAGE_HEIGHT_DP.dp)
+                    .fillMaxWidth()
+            ) {
+                AsyncImage(
+                    imageUri,
+                    modifier = Modifier
+                        .fillMaxSize(),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop
+                )
+            }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = ITEM_PADDING_TOP.dp)
+            ) {
+                Button(
+                    enabled = error == null,
+                    onClick = {
+                        launcher.launch(arrayOf("image/*"))
+                        onOpenPicker()
+                    },
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text(
+                        modifier = Modifier.padding(8.dp),
+                        text = if (error is FormError.PhotoError) stringResource(id = error.messageRes)
+                        else stringResource(
+                            id = R.string.action_photo_picker
+                        )
+                    )
+                }
+                IconButton(
+                    onClick = { imageUri = null }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = stringResource(id = R.string.contentDescription_more)
+                    )
+                }
+            }
+
+        }
+        Button(
+            enabled = error == null,
+            onClick = { onSaveClicked() }
+        ) {
+            Text(
+                modifier = Modifier.padding(8.dp),
+                text = stringResource(id = R.string.action_save)
+            )
+        }
     }
-    Button(
-      enabled = error == null,
-      onClick = { onSaveClicked() }
-    ) {
-      Text(
-        modifier = Modifier.padding(8.dp),
-        text = stringResource(id = R.string.action_save)
-      )
-    }
-  }
 }
 
 @PreviewLightDark
-@PreviewScreenSizes
+//@PreviewScreenSizes
 @Composable
 private fun CreatePostPreview() {
-  HexagonalGamesTheme {
-    CreatePost(
-      title = "test",
-      onTitleChanged = { },
-      description = "description",
-      onDescriptionChanged = { },
-      onSaveClicked = { },
-      error = null
-    )
-  }
+    HexagonalGamesTheme {
+        CreatePost(
+            title = "test",
+            onTitleChanged = { },
+            description = "description",
+            onDescriptionChanged = { },
+            onSaveClicked = { },
+            onOpenPicker = { },
+            onRemovePhoto = { },
+            error = null
+        )
+    }
 }
 
 @PreviewLightDark
-@PreviewScreenSizes
+//@PreviewScreenSizes
 @Composable
-private fun CreatePostErrorPreview() {
-  HexagonalGamesTheme {
-    CreatePost(
-      title = "test",
-      onTitleChanged = { },
-      description = "description",
-      onDescriptionChanged = { },
-      onSaveClicked = { },
-      error = FormError.TitleError
-    )
-  }
+private fun CreatePostTitleErrorPreview() {
+    HexagonalGamesTheme {
+        CreatePost(
+            title = "test",
+            onTitleChanged = { },
+            description = "description",
+            onDescriptionChanged = { },
+            onSaveClicked = { },
+            onOpenPicker = { },
+            onRemovePhoto = { },
+            error = FormError.TitleError
+        )
+    }
 }
+
+@PreviewLightDark
+//@PreviewScreenSizes
+@Composable
+private fun CreatePostImageErrorPreview() {
+    HexagonalGamesTheme {
+        CreatePost(
+            title = "test",
+            onTitleChanged = { },
+            description = "description",
+            onDescriptionChanged = { },
+            onSaveClicked = { },
+            onOpenPicker = { },
+            onRemovePhoto = { },
+            error = FormError.PhotoError
+        )
+    }
+}
+
+private const val CARD_IMAGE_HEIGHT_DP = 300
+private const val ITEM_PADDING_TOP = 16

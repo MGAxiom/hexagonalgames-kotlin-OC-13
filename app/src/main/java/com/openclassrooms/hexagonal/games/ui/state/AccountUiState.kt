@@ -11,7 +11,6 @@ data class AccountUiState(
 )
 
 sealed class NavigationEvent {
-    data object NavigateToLogin : NavigationEvent()
     data object LogoutCompleted : NavigationEvent()
     data object AccountDeletionCompleted : NavigationEvent()
     data class ShowErrorSnackbar(val message: String) : NavigationEvent()

@@ -4,13 +4,9 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
@@ -19,11 +15,6 @@ import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.openclassrooms.hexagonal.games.R
-import com.openclassrooms.hexagonal.games.screen.Screen
-import com.openclassrooms.hexagonal.games.screen.account.AccountScreen
-import com.openclassrooms.hexagonal.games.screen.ad.AddScreen
-import com.openclassrooms.hexagonal.games.screen.homefeed.HomefeedScreen
-import com.openclassrooms.hexagonal.games.screen.settings.SettingsScreen
 import com.openclassrooms.hexagonal.games.ui.theme.HexagonalGamesTheme
 import dagger.hilt.android.AndroidEntryPoint
 

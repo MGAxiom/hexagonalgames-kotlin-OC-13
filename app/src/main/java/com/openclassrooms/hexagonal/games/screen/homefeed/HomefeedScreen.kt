@@ -1,5 +1,6 @@
 package com.openclassrooms.hexagonal.games.screen.homefeed
 
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -170,7 +171,7 @@ private fun HomefeedCell(
         text = post.title,
         style = MaterialTheme.typography.titleLarge
       )
-      if (post.photoUrl.isNullOrEmpty() == false) {
+      if (!post.photoUrl.isNullOrEmpty()) {
         AsyncImage(
           modifier = Modifier
             .padding(top = 8.dp)
@@ -186,7 +187,7 @@ private fun HomefeedCell(
           contentScale = ContentScale.Crop,
         )
       }
-      if (post.description.isNullOrEmpty() == false) {
+      if (!post.description.isNullOrEmpty()) {
         Text(
           text = post.description,
           style = MaterialTheme.typography.bodyMedium
@@ -203,16 +204,17 @@ private fun HomefeedCellPreview() {
   HexagonalGamesTheme {
     HomefeedCell(
       post = Post(
-        id = "1",
-        title = "title",
-        description = "description",
-        photoUrl = null,
-        timestamp = 1,
-        author = User(
           id = "1",
-          firstname = "firstname",
-          lastname = "lastname"
-        )
+          title = "title",
+          description = "description",
+          photoUrl = null,
+          timestamp = 1,
+          author = User(
+              id = "1",
+              firstname = "firstname",
+              lastname = "lastname"
+          ),
+          photoUri = Uri.EMPTY
       ),
       onPostClick = {}
     )
@@ -231,6 +233,7 @@ private fun HomefeedCellImagePreview() {
         description = null,
         photoUrl = "https://picsum.photos/id/85/1080/",
         timestamp = 1,
+        photoUri = Uri.EMPTY,
         author = User(
           id = "1",
           firstname = "firstname",

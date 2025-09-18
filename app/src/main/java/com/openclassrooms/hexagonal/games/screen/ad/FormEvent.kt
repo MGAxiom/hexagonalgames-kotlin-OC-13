@@ -1,7 +1,9 @@
 package com.openclassrooms.hexagonal.games.screen.ad
 
+import android.net.Uri
 import androidx.annotation.StringRes
 import com.openclassrooms.hexagonal.games.R
+import com.openclassrooms.hexagonal.games.domain.model.User
 
 /**
  * A sealed class representing different events that can occur on a form.
@@ -21,6 +23,10 @@ sealed class FormEvent {
    * @property description The new description of the form.
    */
   data class DescriptionChanged(val description: String) : FormEvent()
+
+  data class PhotoUriChanged(val photoUri: Uri) : FormEvent()
+
+  data class AuthorChanged(val author: User) : FormEvent()
   
 }
 
@@ -37,5 +43,8 @@ sealed class FormError(@StringRes val messageRes: Int) {
    * The actual error message can be retrieved using the provided resource ID (`R.string.error_title`).
    */
   data object TitleError : FormError(R.string.error_title)
-  
+
+  data object PhotoError : FormError(R.string.error_image)
+
+
 }

@@ -53,24 +53,35 @@ fun HexagonalGamesNavHost(
             )
         }
         composable(route = Screen.Account.route) {
-            val accountViewModel: AccountViewModel = androidx.hilt.navigation.compose.hiltViewModel()
+            val accountViewModel: AccountViewModel =
+                androidx.hilt.navigation.compose.hiltViewModel()
             val uiState by accountViewModel.uiState.collectAsState()
 
             LaunchedEffect(uiState.navigationEvent) {
                 when (val event = uiState.navigationEvent) {
                     is NavigationEvent.RequestActivitySignIn -> {
-                        Log.d("NavHost", "AccountScreen VM requested sign-in. Calling activity launcher.")
                         activitySignInLauncher()
                         accountViewModel.consumeNavigationEvent()
                     }
+
                     is NavigationEvent.LogoutCompleted -> {
-                        navHostController.popBackStack(Screen.Homefeed.route, inclusive = false, saveState = false)
+                        navHostController.popBackStack(
+                            Screen.Homefeed.route,
+                            inclusive = false,
+                            saveState = false
+                        )
                         accountViewModel.consumeNavigationEvent()
                     }
+
                     is NavigationEvent.AccountDeletionCompleted -> {
-                        navHostController.popBackStack(Screen.Homefeed.route, inclusive = false, saveState = false)
+                        navHostController.popBackStack(
+                            Screen.Homefeed.route,
+                            inclusive = false,
+                            saveState = false
+                        )
                         accountViewModel.consumeNavigationEvent()
                     }
+
                     else -> Unit
                 }
             }
@@ -79,10 +90,12 @@ fun HexagonalGamesNavHost(
                 uiState = uiState,
                 onConsumeError = { accountViewModel.consumeErrorMessage() },
                 onBackClick = { navHostController.navigateUp() },
-                onSignInRequested = { accountViewModel.onSignInRequested() },
+                onSignInRequested = {
+//                    accountViewModel.onSignInRequested()
+                },
                 onLogoutClicked = { accountViewModel.onLogout() },
                 onDeleteAccountClicked = { accountViewModel.onDeleteAccount() },
-                onRefresh = { accountViewModel.refreshUserState() } // If you need a manual refresh
+                onRefresh = { accountViewModel.refreshUserState() }
             )
         }
     }

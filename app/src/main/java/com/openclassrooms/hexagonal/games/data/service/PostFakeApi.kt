@@ -1,5 +1,6 @@
 package com.openclassrooms.hexagonal.games.data.service
 
+import android.net.Uri
 import com.openclassrooms.hexagonal.games.domain.model.Post
 import com.openclassrooms.hexagonal.games.domain.model.User
 import kotlinx.coroutines.flow.Flow
@@ -23,6 +24,7 @@ class PostFakeApi : PostApi {
         "The Secret of the Flowers",
         "Improve your goldfish's physical fitness by getting him a bicycle.",
         null,
+        Uri.EMPTY,
         1629858873, // 25/08/2021
         users[0]
       ),
@@ -31,6 +33,7 @@ class PostFakeApi : PostApi {
         "The Door's Game",
         null,
         "https://picsum.photos/id/85/1080/",
+        Uri.EMPTY,
         1451638679, // 01/01/2016
         users[2]
       ),
@@ -39,6 +42,7 @@ class PostFakeApi : PostApi {
         "Laughing History",
         "He learned the important lesson that a picnic at the beach on a windy day is a bad idea.",
         "",
+        Uri.EMPTY,
         1361696994, // 24/02/2013
         users[0]
       ),
@@ -47,6 +51,7 @@ class PostFakeApi : PostApi {
         "Woman of Years",
         "After fighting off the alligator, Brian still had to face the anaconda.",
         null,
+        Uri.EMPTY,
         1346601558, // 02/09/2012
         users[0]
       ),
@@ -55,6 +60,7 @@ class PostFakeApi : PostApi {
         "The Invisible Window",
         null,
         "https://picsum.photos/id/40/1080/",
+        Uri.EMPTY,
         1210645031, // 13/05/2008
         users[1]
       ),
