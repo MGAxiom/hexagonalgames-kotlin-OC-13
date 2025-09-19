@@ -59,11 +59,11 @@ class AccountViewModel @Inject constructor(
         }
     }
 
-//    fun onSignInRequested() {
-//        if (_uiState.value.currentUser == null) {
-//            _uiState.update { it.copy(navigationEvent = NavigationEvent.RequestActivitySignIn) }
-//        }
-//    }
+    fun onSignInRequested() {
+        if (_uiState.value.currentUser == null) {
+            _uiState.update { it.copy(navigationEvent = NavigationEvent.RequestActivitySignIn) }
+        }
+    }
 
     fun consumeNavigationEvent() {
         _uiState.update { it.copy(navigationEvent = null) }

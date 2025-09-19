@@ -24,7 +24,7 @@ sealed class FormEvent {
    */
   data class DescriptionChanged(val description: String) : FormEvent()
 
-  data class PhotoUriChanged(val photoUri: Uri) : FormEvent()
+  data class PhotoUriChanged(val photoUri: Uri?) : FormEvent()
 
   data class AuthorChanged(val author: User) : FormEvent()
   

@@ -1,6 +1,10 @@
 package com.openclassrooms.hexagonal.games.ui
 
+import android.net.Uri
 import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.result.launch
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -12,8 +16,11 @@ import com.openclassrooms.hexagonal.games.screen.Screen
 import com.openclassrooms.hexagonal.games.screen.account.AccountScreen
 import com.openclassrooms.hexagonal.games.screen.account.AccountViewModel
 import com.openclassrooms.hexagonal.games.screen.ad.AddScreen
+import com.openclassrooms.hexagonal.games.screen.ad.AddViewModel
+import com.openclassrooms.hexagonal.games.screen.ad.FormEvent
 import com.openclassrooms.hexagonal.games.screen.homefeed.HomefeedScreen
 import com.openclassrooms.hexagonal.games.screen.settings.SettingsScreen
+import com.openclassrooms.hexagonal.games.ui.state.AddNavigationEvent
 import com.openclassrooms.hexagonal.games.ui.state.NavigationEvent
 
 @Composable
@@ -42,9 +49,39 @@ fun HexagonalGamesNavHost(
             )
         }
         composable(route = Screen.AddPost.route) {
+            val addViewModel: AddViewModel = androidx.hilt.navigation.compose.hiltViewModel()
+            val uiState by addViewModel.uiState.collectAsState()
+            val post by addViewModel.post.collectAsState()
+
+            val imagePickerLauncherForAddScreen =
+                rememberLauncherForActivityResult(
+                contract = ActivityResultContracts.GetContent()
+            ) { uri: Uri? ->
+                addViewModel.onAction(FormEvent.PhotoUriChanged(uri))
+            }
+
+            LaunchedEffect(uiState.navigationEvent) {
+                when (val event = uiState.navigationEvent) {
+                    is AddNavigationEvent.RequestImagePicker -> {
+                        imagePickerLauncherForAddScreen.launch("image/*")
+                        addViewModel.consumeNavigationEvent()
+                    }
+                    null -> Unit
+                }
+            }
+
             AddScreen(
+                post = post,
+                uiState = uiState,
+                onFormEvent = { event -> addViewModel.onAction(event) },
+                onOpenImagePicker = { addViewModel.onOpenImagePickerRequested() },
+                onSaveClick = {
+                    addViewModel.addPost()
+                    navHostController.navigateUp()
+                },
                 onBackClick = { navHostController.navigateUp() },
-                onSaveClick = { navHostController.navigateUp() }
+                onClearSelectedImage = { addViewModel.clearSelectedImage() },
+                onConsumeErrorMessage = { addViewModel.consumeErrorMessage() }
             )
         }
         composable(route = Screen.Settings.route) {
@@ -90,9 +127,7 @@ fun HexagonalGamesNavHost(
                 uiState = uiState,
                 onConsumeError = { accountViewModel.consumeErrorMessage() },
                 onBackClick = { navHostController.navigateUp() },
-                onSignInRequested = {
-//                    accountViewModel.onSignInRequested()
-                },
+                onSignInRequested = { accountViewModel.onSignInRequested() },
                 onLogoutClicked = { accountViewModel.onLogout() },
                 onDeleteAccountClicked = { accountViewModel.onDeleteAccount() },
                 onRefresh = { accountViewModel.refreshUserState() }
