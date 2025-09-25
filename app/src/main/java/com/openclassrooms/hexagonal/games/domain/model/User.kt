@@ -11,15 +11,15 @@ data class User(
   /**
    * Unique identifier for the User.
    */
-  val id: String,
+  val id: String = "default",
   
   /**
    * User's first name.
    */
-  val firstname: String,
+  val firstname: String = "",
   
   /**
    * User's last name.
    */
-  val lastname: String
+  val lastname: String = ""
 ) : Serializable

@@ -8,6 +8,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
+import com.openclassrooms.hexagonal.games.data.repository.FirestoreRepository
 import com.openclassrooms.hexagonal.games.data.repository.PostRepository
 import com.openclassrooms.hexagonal.games.domain.model.Post
 import com.openclassrooms.hexagonal.games.domain.model.User
@@ -30,7 +31,8 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class AddViewModel @Inject constructor(
-    private val postRepository: PostRepository
+    private val postRepository: PostRepository,
+    private val firestorage: FirestoreRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(AddUiState())
@@ -119,7 +121,7 @@ class AddViewModel @Inject constructor(
             _uiState.update { it.copy(errorMessage = "Title cannot be empty.") }
             return
         }
-        
+
         val (name, lastname) = getCurrentUserName()
         val author = User(
             "1",
@@ -130,8 +132,10 @@ class AddViewModel @Inject constructor(
         if (currentPost.photoUri != null) {
             uploadImageAndAddPost(currentPost.photoUri, currentPost, author)
         } else {
-            val postToSave = currentPost.copy(author = author, timestamp = System.currentTimeMillis())
+            val postToSave =
+                currentPost.copy(author = author, timestamp = System.currentTimeMillis())
             postRepository.addPost(postToSave)
+
             // TODO: Update UIState to indicate success/navigate back
             // _uiState.update { it.copy(navigationEvent = SomeSuccessEvent) }
         }
@@ -140,7 +144,8 @@ class AddViewModel @Inject constructor(
     private fun uploadImageAndAddPost(imageUri: Uri, postData: Post, author: User) {
         _uiState.update { it.copy(isLoading = true, errorMessage = null) }
         val userId = author.id
-        val fileName = "post_images/${userId}/${UUID.randomUUID()}_${imageUri.lastPathSegment ?: "image.jpg"}"
+        val fileName =
+            "post_images/${userId}/${UUID.randomUUID()}_${imageUri.lastPathSegment ?: "image.jpg"}"
         val imageStorageRef = storageRef.child(fileName)
 
         val uploadTask = imageStorageRef.putFile(imageUri)
@@ -155,13 +160,49 @@ class AddViewModel @Inject constructor(
                     timestamp = System.currentTimeMillis()
                 )
                 postRepository.addPost(postWithImageUrl)
-                _uiState.update { it.copy(isLoading = false, errorMessage = "Post added successfully!") }
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        errorMessage = "Post added successfully!"
+                    )
+                }
+                firestorage.addPost(
+                    postWithImageUrl,
+                    onSuccess = {
+                        _uiState.update {
+                            it.copy(
+                                isLoading = false,
+                                errorMessage = "Post added successfully!"
+                            )
+                        }
+                        Log.d("AddViewModel", "addPost = success!")
+                    },
+                    onFailure = {
+                        _uiState.update {
+                            it.copy(
+                                isLoading = false,
+                                errorMessage = "Error adding post: ${it.errorMessage}"
+                            )
+                        }
+                        Log.d("AddViewModel", "addPost = eh it failed!")
+                    }
+                )
                 // TODO: Update UIState to indicate success/navigate back
             }.addOnFailureListener { exception ->
-                _uiState.update { it.copy(isLoading = false, errorMessage = "Image upload succeeded but failed to get URL: ${exception.message}") }
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        errorMessage = "Image upload succeeded but failed to get URL: ${exception.message}"
+                    )
+                }
             }
         }.addOnFailureListener { exception ->
-            _uiState.update { it.copy(isLoading = false, errorMessage = "Image upload failed: ${exception.message}") }
+            _uiState.update {
+                it.copy(
+                    isLoading = false,
+                    errorMessage = "Image upload failed: ${exception.message}"
+                )
+            }
         }.addOnProgressListener { taskSnapshot ->
             val progress = (100.0 * taskSnapshot.bytesTransferred) / taskSnapshot.totalByteCount
             _uiState.update { it.copy(uploadProgress = progress.toInt()) }
@@ -192,7 +233,10 @@ class AddViewModel @Inject constructor(
                 if (parts.size > 1) {
                     lastName = parts.getOrNull(1)
                 } else {
-                    Log.w("UserInfo", "Display name '$fullName' might not contain a separate last name.")
+                    Log.w(
+                        "UserInfo",
+                        "Display name '$fullName' might not contain a separate last name."
+                    )
                 }
             }
         }

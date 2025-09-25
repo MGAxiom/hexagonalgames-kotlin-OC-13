@@ -1,7 +1,9 @@
 package com.openclassrooms.hexagonal.games.screen.homefeed
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.openclassrooms.hexagonal.games.data.repository.FirestoreRepository
 import com.openclassrooms.hexagonal.games.data.repository.PostRepository
 import com.openclassrooms.hexagonal.games.domain.model.Post
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -16,8 +18,10 @@ import javax.inject.Inject
  * allowing UI components to observe and react to changes in the posts data.
  */
 @HiltViewModel
-class HomefeedViewModel @Inject constructor(private val postRepository: PostRepository) :
-  ViewModel() {
+class HomefeedViewModel @Inject constructor(
+  private val postRepository: PostRepository,
+  private val firestoreRepository: FirestoreRepository
+) : ViewModel() {
   
   private val _posts: MutableStateFlow<List<Post>> = MutableStateFlow(emptyList())
   
@@ -31,10 +35,23 @@ class HomefeedViewModel @Inject constructor(private val postRepository: PostRepo
   
   init {
     viewModelScope.launch {
-      postRepository.posts.collect {
-        _posts.value = it
-      }
+      getAllPosts()
     }
   }
-  
+
+  fun getAllPosts() {
+    firestoreRepository.getAllPosts(
+      onSuccess = { posts ->
+        viewModelScope.launch {
+            postRepository.posts.collect { localPosts ->
+              _posts.value = posts + localPosts
+            }
+        }
+//        _posts.value = posts
+      },
+      onFailure = { exception ->
+        Log.d("HomefeedViewModel", "getAllPosts: $exception")
+      }
+    )
+  }
 }

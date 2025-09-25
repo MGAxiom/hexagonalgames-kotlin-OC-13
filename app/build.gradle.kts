@@ -48,6 +48,7 @@ dependencies {
 
   //DI
   implementation(libs.hilt)
+  implementation(libs.firebase.firestore)
 
   ksp(libs.hilt.compiler)
   implementation(libs.hilt.navigation.compose)

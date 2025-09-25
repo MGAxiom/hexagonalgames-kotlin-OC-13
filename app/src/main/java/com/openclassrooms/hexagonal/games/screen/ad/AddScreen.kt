@@ -67,7 +67,6 @@ fun AddScreen(
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
-    val context = LocalContext.current
 
     LaunchedEffect(uiState.errorMessage) {
         uiState.errorMessage?.let { message ->
@@ -211,7 +210,7 @@ private fun CreatePost(
                 }
             }
         }
-        if (uiState.uploadProgress != 0) {
+        if (uiState.isLoading) {
             LinearProgressIndicator(
                 progress = {
                     uiState.uploadProgress?.let { it / 100f } ?: 0f
