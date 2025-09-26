@@ -39,5 +39,6 @@ data class Post(
   /**
    * User object representing the author of the Post.
    */
-  val author: User? = null
+  val author: User? = null,
+  val comments: List<PostComments> = emptyList()
 ) : Serializable

@@ -12,12 +12,15 @@ import androidx.compose.runtime.getValue
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.openclassrooms.hexagonal.games.domain.model.Post
 import com.openclassrooms.hexagonal.games.screen.Screen
 import com.openclassrooms.hexagonal.games.screen.account.AccountScreen
 import com.openclassrooms.hexagonal.games.screen.account.AccountViewModel
 import com.openclassrooms.hexagonal.games.screen.ad.AddScreen
 import com.openclassrooms.hexagonal.games.screen.ad.AddViewModel
 import com.openclassrooms.hexagonal.games.screen.ad.FormEvent
+import com.openclassrooms.hexagonal.games.screen.details.AddCommentsScreen
+import com.openclassrooms.hexagonal.games.screen.details.PublicationDetailsScreen
 import com.openclassrooms.hexagonal.games.screen.homefeed.HomefeedScreen
 import com.openclassrooms.hexagonal.games.screen.settings.SettingsScreen
 import com.openclassrooms.hexagonal.games.ui.state.AddNavigationEvent
@@ -35,7 +38,7 @@ fun HexagonalGamesNavHost(
         composable(route = Screen.Homefeed.route) {
             HomefeedScreen(
                 onPostClick = {
-                    //TODO
+                    navHostController.navigate(Screen.Details.route)
                 },
                 onSettingsClick = {
                     navHostController.navigate(Screen.Settings.route)
@@ -82,6 +85,21 @@ fun HexagonalGamesNavHost(
                 onBackClick = { navHostController.navigateUp() },
                 onClearSelectedImage = { addViewModel.clearSelectedImage() },
                 onConsumeErrorMessage = { addViewModel.consumeErrorMessage() }
+            )
+        }
+        composable(route = Screen.Details.route) {
+            PublicationDetailsScreen(
+                post = Post(),
+                onBackClick = { navHostController.navigateUp() },
+                onAddComment = { navHostController.navigate(Screen.Comments.route) }
+            )
+        }
+
+        composable(route = Screen.Comments.route) {
+            AddCommentsScreen(
+                post = Post(),
+                onBackClick = { navHostController.navigateUp() },
+                onSaveComment = { navHostController.navigateUp() }
             )
         }
         composable(route = Screen.Settings.route) {

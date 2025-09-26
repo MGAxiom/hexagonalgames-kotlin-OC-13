@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.MoreVert
@@ -31,6 +32,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.layout.ContentScale
@@ -158,6 +160,7 @@ private fun HomefeedCell(
     }) {
     Column(
       modifier = Modifier.padding(8.dp),
+      verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
       Text(
         text = stringResource(
@@ -171,12 +174,19 @@ private fun HomefeedCell(
         text = post.title,
         style = MaterialTheme.typography.titleLarge
       )
+      if (!post.description.isNullOrEmpty()) {
+        Text(
+          text = post.description,
+          style = MaterialTheme.typography.bodyMedium
+        )
+      }
       if (!post.photoUrl.isNullOrEmpty()) {
         AsyncImage(
           modifier = Modifier
-            .padding(top = 8.dp)
+            .padding(top = 8.dp, bottom = 8.dp)
             .fillMaxWidth()
             .heightIn(max = 200.dp)
+            .clip(RoundedCornerShape(10.dp))
             .aspectRatio(ratio = 16 / 9f),
           model = post.photoUrl,
           imageLoader = LocalContext.current.imageLoader.newBuilder()
@@ -185,12 +195,6 @@ private fun HomefeedCell(
           placeholder = ColorPainter(Color.DarkGray),
           contentDescription = "image",
           contentScale = ContentScale.Crop,
-        )
-      }
-      if (!post.description.isNullOrEmpty()) {
-        Text(
-          text = post.description,
-          style = MaterialTheme.typography.bodyMedium
         )
       }
     }

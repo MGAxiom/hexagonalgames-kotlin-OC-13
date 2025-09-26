@@ -19,4 +19,6 @@
   <string name="contentDescription_notification_icon">Notification icon</string>
   <string name="error_title">Titre non valide</string>
   <string name="error_image">Photo non valide</string>
+  <string name="details_author">Par %1$s %2$s</string>
+  <string name="add_comment_title">Ajout d\'un commentaire</string>
 </resources>

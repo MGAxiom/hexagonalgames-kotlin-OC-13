@@ -20,4 +20,6 @@
   <string name="error_title">Title not valid</string>
   <string name="error_image">Invalid photo</string>
   <string name="default_web_client_id" translatable="false">webClientId.apps.googleusercontent.com</string>
+  <string name="details_author">By %1$s %2$s</string>
+  <string name="add_comment_title">Add a comment</string>
 </resources>
