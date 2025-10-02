@@ -10,8 +10,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import com.openclassrooms.hexagonal.games.domain.model.Post
 import com.openclassrooms.hexagonal.games.screen.Screen
 import com.openclassrooms.hexagonal.games.screen.account.AccountScreen
@@ -37,8 +39,8 @@ fun HexagonalGamesNavHost(
     ) {
         composable(route = Screen.Homefeed.route) {
             HomefeedScreen(
-                onPostClick = {
-                    navHostController.navigate(Screen.Details.route)
+                onPostClick = { post ->
+                    navHostController.navigate(Screen.Details.route + "/${post.id}")
                 },
                 onSettingsClick = {
                     navHostController.navigate(Screen.Settings.route)
@@ -58,10 +60,10 @@ fun HexagonalGamesNavHost(
 
             val imagePickerLauncherForAddScreen =
                 rememberLauncherForActivityResult(
-                contract = ActivityResultContracts.GetContent()
-            ) { uri: Uri? ->
-                addViewModel.onAction(FormEvent.PhotoUriChanged(uri))
-            }
+                    contract = ActivityResultContracts.GetContent()
+                ) { uri: Uri? ->
+                    addViewModel.onAction(FormEvent.PhotoUriChanged(uri))
+                }
 
             LaunchedEffect(uiState.navigationEvent) {
                 when (val event = uiState.navigationEvent) {
@@ -69,6 +71,7 @@ fun HexagonalGamesNavHost(
                         imagePickerLauncherForAddScreen.launch("image/*")
                         addViewModel.consumeNavigationEvent()
                     }
+
                     null -> Unit
                 }
             }
@@ -87,9 +90,11 @@ fun HexagonalGamesNavHost(
                 onConsumeErrorMessage = { addViewModel.consumeErrorMessage() }
             )
         }
-        composable(route = Screen.Details.route) {
+        composable(
+            route = Screen.Details.route + "/{postId}",
+            arguments = listOf(navArgument("postId") { type = NavType.StringType })
+        ) { backStackEntry ->
             PublicationDetailsScreen(
-                post = Post(),
                 onBackClick = { navHostController.navigateUp() },
                 onAddComment = { navHostController.navigate(Screen.Comments.route) }
             )
@@ -97,7 +102,6 @@ fun HexagonalGamesNavHost(
 
         composable(route = Screen.Comments.route) {
             AddCommentsScreen(
-                post = Post(),
                 onBackClick = { navHostController.navigateUp() },
                 onSaveComment = { navHostController.navigateUp() }
             )

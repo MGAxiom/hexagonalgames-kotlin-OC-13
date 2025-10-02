@@ -1,10 +1,9 @@
 package com.openclassrooms.hexagonal.games.ui.state
 
-import android.net.Uri
+import com.openclassrooms.hexagonal.games.domain.model.Post
 
 data class DetailsUiState(
-//    val navigationEvent: AddNavigationEvent? = null,
+    val post: Post? = null,
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
-    val uploadProgress: Int? = null,
 )

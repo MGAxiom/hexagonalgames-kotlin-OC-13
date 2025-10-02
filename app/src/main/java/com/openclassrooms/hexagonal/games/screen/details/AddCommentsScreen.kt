@@ -37,7 +37,6 @@ import com.openclassrooms.hexagonal.games.ui.state.DetailsUiState
 @Composable
 fun AddCommentsScreen(
     onBackClick: () -> Unit,
-    post: Post,
     onSaveComment: () -> Unit,
 ) {
 
@@ -58,24 +57,9 @@ fun AddCommentsScreen(
                 },
             )
         },
-        floatingActionButtonPosition = FabPosition.End,
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = {
-                    onSaveComment()
-                }
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.Done,
-                    contentDescription = stringResource(id = R.string.action_save)
-                )
-            }
-        }
     ) { contentPadding ->
         AddCommentsContent(
             padding = contentPadding,
-            post = post,
-            uiState = DetailsUiState(),
             onSaveClick = onSaveComment
         )
     }
@@ -84,18 +68,20 @@ fun AddCommentsScreen(
 @Composable
 private fun AddCommentsContent(
     padding: PaddingValues,
-    post: Post,
-    uiState: DetailsUiState,
     onSaveClick: () -> Unit,
 ) {
     var text = remember { mutableStateOf("") }
 
-    Column {
+    Column(
+        modifier = Modifier.padding(padding)
+            .fillMaxWidth()
+            .padding(ITEM_PADDING_TOP.dp),
+    ) {
         OutlinedTextField(
             value = text.value,
             onValueChange = { text.value = it },
             label = { Text("Comment") },
-            modifier = Modifier.fillMaxWidth().height(120.dp),
+            modifier = Modifier.fillMaxWidth().height(COMMENT_TEXTFIELD_SIZE.dp),
             maxLines = 20
         )
         
@@ -116,9 +102,9 @@ private fun AddCommentsContent(
 private fun AddCommentsScreenPreview() {
     AddCommentsScreen(
         onBackClick = {},
-        post = Post(),
         onSaveComment = {}
     )
 }
 
 private const val ITEM_PADDING_TOP = 16
+private const val COMMENT_TEXTFIELD_SIZE = 340

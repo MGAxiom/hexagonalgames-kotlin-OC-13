@@ -32,6 +32,8 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -47,6 +49,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import coil.imageLoader
 import coil.util.DebugLogger
@@ -60,18 +63,18 @@ import com.openclassrooms.hexagonal.games.ui.state.DetailsUiState
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PublicationDetailsScreen(
-    post: Post,
+    viewModel: PublicationDetailsViewModel = hiltViewModel(),
     onBackClick: () -> Unit,
     onAddComment: () -> Unit,
 ) {
-
+    val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
-                title = { Text(post.title) },
+                title = { Text(uiState.post?.title ?: "Loading...") },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(
@@ -96,11 +99,12 @@ fun PublicationDetailsScreen(
             }
         }
     ) { contentPadding ->
-        PostDetails(
-            padding = contentPadding,
-            post = post,
-            uiState = DetailsUiState(),
-        )
+        uiState.post?.let {
+            PostDetails(
+                padding = contentPadding,
+                post = it,
+            )
+        }
     }
 }
 
@@ -108,8 +112,6 @@ fun PublicationDetailsScreen(
 private fun PostDetails(
     padding: PaddingValues,
     post: Post,
-    uiState: DetailsUiState,
-    error: FormError? = null,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -131,8 +133,8 @@ private fun PostDetails(
             Text(
                 stringResource(
                     id = R.string.details_author,
-                    "${post.author?.firstname}",
-                    "${post.author?.lastname}"
+                    post.author?.firstname ?: "unkown",
+                    post.author?.lastname ?: "unkown"
                 )
             )
         }
@@ -241,7 +243,6 @@ private fun PostDetailsPreview() {
                 lastname = "Test",
             )
         ),
-        uiState = DetailsUiState(),
     )
 }
 

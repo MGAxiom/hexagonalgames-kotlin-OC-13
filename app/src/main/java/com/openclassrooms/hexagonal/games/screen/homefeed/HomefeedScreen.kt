@@ -139,7 +139,7 @@ private fun HomefeedList(
     modifier = modifier.padding(8.dp),
     verticalArrangement = Arrangement.spacedBy(8.dp),
   ) {
-    items(posts) { post ->
+    items(posts, key = { post -> post.id }) { post ->
       HomefeedCell(
         post = post,
         onPostClick = onPostClick

@@ -53,18 +53,4 @@ class FirestoreRepository @Inject constructor(
                 onFailure(it)
             }
     }
-
-    fun deletePost(
-        postId: String,
-        onSuccess: () -> Unit,
-        onFailure: (Exception) -> Unit
-    ) {
-        firestore.collection("posts")
-            .document(postId)
-            .delete()
-            .addOnSuccessListener { onSuccess() }
-            .addOnFailureListener {
-                onFailure(it)
-            }
-    }
 }
