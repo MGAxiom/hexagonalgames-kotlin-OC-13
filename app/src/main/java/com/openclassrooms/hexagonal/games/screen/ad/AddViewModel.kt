@@ -4,17 +4,15 @@ import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
+import com.openclassrooms.hexagonal.games.data.repository.AuthRepository
 import com.openclassrooms.hexagonal.games.data.repository.FirestoreRepository
 import com.openclassrooms.hexagonal.games.data.repository.PostRepository
 import com.openclassrooms.hexagonal.games.domain.model.Post
 import com.openclassrooms.hexagonal.games.domain.model.User
 import com.openclassrooms.hexagonal.games.ui.state.AddNavigationEvent
 import com.openclassrooms.hexagonal.games.ui.state.AddUiState
-import com.openclassrooms.hexagonal.games.utils.getCurrentUserName
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -33,13 +31,14 @@ import javax.inject.Inject
 @HiltViewModel
 class AddViewModel @Inject constructor(
     private val postRepository: PostRepository,
-    private val firestorage: FirestoreRepository
+    private val firestorage: FirestoreRepository,
+    storage: FirebaseStorage,
+    private val authRepository: AuthRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(AddUiState())
     val uiState: StateFlow<AddUiState> = _uiState.asStateFlow()
 
-    private val storage: FirebaseStorage = FirebaseStorage.getInstance()
     private val storageRef: StorageReference = storage.reference
 
     /**
@@ -123,11 +122,11 @@ class AddViewModel @Inject constructor(
             return
         }
 
-        val (name, lastname) = getCurrentUserName()
+        val firebaseUser = authRepository.getCurrentUser()
         val author = User(
-            "1",
-            name ?: "Unknown",
-            lastname ?: "Unknown"
+            id = firebaseUser?.uid ?: "unknown_id",
+            firstname = firebaseUser?.displayName ?: "Unknown",
+            lastname = ""
         )
 
         if (currentPost.photoUri != null) {

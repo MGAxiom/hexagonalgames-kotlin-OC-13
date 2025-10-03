@@ -117,11 +117,13 @@ private fun PostDetails(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .padding(vertical = PADDING_VERTICAL.dp)
+                .fillMaxWidth(),
         ) {
             Text(
                 text = post.title,
-                fontSize = 15.sp,
+                fontSize = PADDING_VERTICAL.sp,
                 fontWeight = FontWeight.Bold,
             )
             Spacer(modifier = Modifier.weight(1f))
@@ -154,6 +156,7 @@ private fun PostDetails(
             Text(
                 text = it,
                 modifier = Modifier
+                    .padding(vertical = PADDING_VERTICAL.dp)
                     .fillMaxWidth()
             )
         }
@@ -165,13 +168,15 @@ private fun PostDetails(
     }
 }
 
+
+
 @Composable
 private fun PostCommentsList(
     postComments: List<PostComments>,
     modifier: Modifier = Modifier
 ) {
     HorizontalDivider(
-        modifier = modifier.padding(horizontal = 8.dp)
+        modifier = modifier.padding(horizontal = DIVIDER_PADDING.dp)
     )
 
     Spacer(modifier = Modifier
@@ -180,9 +185,9 @@ private fun PostCommentsList(
     )
 
     Text(
-        text = "Commentaires",
+        text = stringResource(R.string.add_comment_comment_section_title),
         textAlign = TextAlign.Center,
-        fontSize = 15.sp,
+        fontSize = PADDING_VERTICAL.sp,
         fontWeight = FontWeight.Bold,
         modifier = Modifier
             .fillMaxWidth()
@@ -197,7 +202,7 @@ private fun PostCommentsList(
     LazyColumn(
         modifier = Modifier
             .clip(RoundedCornerShape(8.dp))
-            .background(Color.DarkGray.copy(alpha = 0.2f))
+            .commentListBackground(postComments.isNotEmpty())
             .fillMaxWidth()
             .padding(8.dp),
     ) {
@@ -212,13 +217,27 @@ private fun PostCommentsList(
                         R.string.details_author,
                         "${postComment.author?.firstname}",
                         "${postComment.author?.lastname}"
-                    )
+                    ),
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(start = 10.dp)
                 )
-                Text(postComment.comment)
+                Text(
+                    text = postComment.comment,
+                    modifier = Modifier.padding(start = 10.dp)
+                )
             }
         }
     }
 }
+
+private fun Modifier.commentListBackground(hasComments: Boolean) =
+    if(hasComments)
+        background(Color.DarkGray.copy(alpha = 0.2f))
+    else
+        background(Color.DarkGray.copy(alpha = 0f))
+
+private const val DIVIDER_PADDING = 30
+private const val PADDING_VERTICAL = 15
 
 @Preview
 @Composable
