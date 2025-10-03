@@ -1,7 +1,6 @@
 package com.openclassrooms.hexagonal.games.screen.homefeed
 
 import android.net.Uri
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
@@ -56,7 +55,7 @@ import com.openclassrooms.hexagonal.games.ui.theme.HexagonalGamesTheme
 fun HomefeedScreen(
   modifier: Modifier = Modifier,
   viewModel: HomefeedViewModel = hiltViewModel(),
-  onPostClick: (Post) -> Unit,
+  onPostClick: (String) -> Unit,
   onSettingsClick: () -> Unit,
   onAccountClick: () -> Unit,
   onFABClick: () -> Unit,
@@ -133,7 +132,7 @@ fun HomefeedScreen(
 private fun HomefeedList(
   modifier: Modifier = Modifier,
   posts: List<Post>,
-  onPostClick: (Post) -> Unit,
+  onPostClick: (String) -> Unit,
 ) {
   LazyColumn(
     modifier = modifier.padding(8.dp),
@@ -151,12 +150,12 @@ private fun HomefeedList(
 @Composable
 private fun HomefeedCell(
   post: Post,
-  onPostClick: (Post) -> Unit,
+  onPostClick: (String) -> Unit,
 ) {
   ElevatedCard(
     modifier = Modifier.fillMaxWidth(),
     onClick = {
-      onPostClick(post)
+      onPostClick(post.id)
     }) {
     Column(
       modifier = Modifier.padding(8.dp),

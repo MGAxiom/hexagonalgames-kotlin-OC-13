@@ -1,7 +1,9 @@
 package com.openclassrooms.hexagonal.games.data.repository
 
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.openclassrooms.hexagonal.games.domain.model.Post
+import com.openclassrooms.hexagonal.games.domain.model.PostComments
 import jakarta.inject.Inject
 import javax.inject.Singleton
 
@@ -21,6 +23,19 @@ class FirestoreRepository @Inject constructor(
             .addOnFailureListener {
                 onFailure(it)
             }
+    }
+
+    fun addCommentToPost(
+        postId: String,
+        comment: PostComments,
+        onSuccess: () -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
+        val postRef = firestore.collection("posts").document(postId)
+
+        postRef.update("comments", FieldValue.arrayUnion(comment))
+            .addOnSuccessListener { onSuccess() }
+            .addOnFailureListener { onFailure(it) }
     }
 
     fun getPost(

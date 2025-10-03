@@ -14,6 +14,7 @@ import com.openclassrooms.hexagonal.games.domain.model.Post
 import com.openclassrooms.hexagonal.games.domain.model.User
 import com.openclassrooms.hexagonal.games.ui.state.AddNavigationEvent
 import com.openclassrooms.hexagonal.games.ui.state.AddUiState
+import com.openclassrooms.hexagonal.games.utils.getCurrentUserName
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -135,9 +136,6 @@ class AddViewModel @Inject constructor(
             val postToSave =
                 currentPost.copy(author = author, timestamp = System.currentTimeMillis())
             postRepository.addPost(postToSave)
-
-            // TODO: Update UIState to indicate success/navigate back
-            // _uiState.update { it.copy(navigationEvent = SomeSuccessEvent) }
         }
     }
 
@@ -187,7 +185,6 @@ class AddViewModel @Inject constructor(
                         Log.d("AddViewModel", "addPost = eh it failed!")
                     }
                 )
-                // TODO: Update UIState to indicate success/navigate back
             }.addOnFailureListener { exception ->
                 _uiState.update {
                     it.copy(
@@ -220,29 +217,6 @@ class AddViewModel @Inject constructor(
     fun consumeErrorMessage() {
         _uiState.update { it.copy(errorMessage = null) }
     }
-
-    fun getCurrentUserName(): Pair<String?, String?> {
-        val firebaseUser: FirebaseUser? = FirebaseAuth.getInstance().currentUser
-        var firstName: String? = null
-        var lastName: String? = null
-
-        firebaseUser?.displayName?.let { fullName ->
-            if (fullName.isNotBlank()) {
-                val parts = fullName.split(" ", limit = 2)
-                firstName = parts.getOrNull(0)
-                if (parts.size > 1) {
-                    lastName = parts.getOrNull(1)
-                } else {
-                    Log.w(
-                        "UserInfo",
-                        "Display name '$fullName' might not contain a separate last name."
-                    )
-                }
-            }
-        }
-        return Pair(firstName, lastName)
-    }
-
 
     /**
      * Verifies mandatory fields of the post
