@@ -26,6 +26,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -60,6 +61,11 @@ fun HomefeedScreen(
   onAccountClick: () -> Unit,
   onFABClick: () -> Unit,
 ) {
+
+  LaunchedEffect(Unit) {
+    viewModel.refreshPosts()
+  }
+
   var showMenu by rememberSaveable { mutableStateOf(false) }
   
   Scaffold(
@@ -138,7 +144,10 @@ private fun HomefeedList(
     modifier = modifier.padding(8.dp),
     verticalArrangement = Arrangement.spacedBy(8.dp),
   ) {
-    items(posts, key = { post -> post.id }) { post ->
+    items(
+      posts.sortedByDescending { it.timestamp },
+      key = { post -> post.id }
+    ) { post ->
       HomefeedCell(
         post = post,
         onPostClick = onPostClick

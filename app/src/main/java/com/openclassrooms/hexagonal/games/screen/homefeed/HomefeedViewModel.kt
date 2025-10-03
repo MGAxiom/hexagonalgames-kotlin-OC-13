@@ -19,7 +19,6 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class HomefeedViewModel @Inject constructor(
-  private val postRepository: PostRepository,
   private val firestoreRepository: FirestoreRepository
 ) : ViewModel() {
   
@@ -39,15 +38,18 @@ class HomefeedViewModel @Inject constructor(
     }
   }
 
+  internal fun refreshPosts() {
+    viewModelScope.launch {
+      getAllPosts()
+    }
+  }
+
   fun getAllPosts() {
     firestoreRepository.getAllPosts(
       onSuccess = { posts ->
         viewModelScope.launch {
-            postRepository.posts.collect { localPosts ->
-              _posts.value = posts + localPosts
-            }
+              _posts.value = posts
         }
-//        _posts.value = posts
       },
       onFailure = { exception ->
         Log.d("HomefeedViewModel", "getAllPosts: $exception")

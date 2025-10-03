@@ -29,6 +29,10 @@ class PublicationDetailsViewModel @Inject constructor(
         }
     }
 
+    internal fun refreshDetails() {
+        _uiState.value.post?.id?.let { loadPostDetails(it) }
+    }
+
     private fun loadPostDetails(postId: String) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }

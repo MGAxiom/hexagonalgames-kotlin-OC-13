@@ -30,6 +30,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -47,6 +48,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import coil.compose.AsyncImage
 import coil.imageLoader
 import coil.util.DebugLogger
@@ -59,11 +62,16 @@ import com.openclassrooms.hexagonal.games.domain.model.User
 @Composable
 fun PublicationDetailsScreen(
     viewModel: PublicationDetailsViewModel = hiltViewModel(),
+    lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current,
     onBackClick: () -> Unit,
     onAddComment: (String) -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(Unit) {
+        viewModel.refreshDetails()
+    }
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -206,7 +214,7 @@ private fun PostCommentsList(
             .fillMaxWidth()
             .padding(8.dp),
     ) {
-        items(postComments) { postComment ->
+        items(postComments.reversed()) { postComment ->
             Card(
                 modifier = Modifier
                     .fillMaxWidth()

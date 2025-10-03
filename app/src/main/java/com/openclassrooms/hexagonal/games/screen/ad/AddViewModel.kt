@@ -125,28 +125,28 @@ class AddViewModel @Inject constructor(
         val firebaseUser = authRepository.getCurrentUser()
         val author = User(
             id = firebaseUser?.uid ?: "unknown_id",
-            firstname = firebaseUser?.displayName ?: "Unknown",
-            lastname = ""
+            firstname = firebaseUser?.displayName?.split(" ")?.first() ?: "Unknown",
+            lastname = firebaseUser?.displayName?.split(" ")?.last() ?: ""
         )
 
-        if (currentPost.photoUri != null) {
-            uploadImageAndAddPost(currentPost.photoUri, currentPost, author)
-        } else {
-            val postToSave =
-                currentPost.copy(author = author, timestamp = System.currentTimeMillis())
-            postRepository.addPost(postToSave)
-        }
+        uploadImageAndAddPost(
+            currentPost.photoUri, currentPost, author
+        )
+        val postToSave =
+            currentPost.copy(author = author, timestamp = System.currentTimeMillis())
+        postRepository.addPost(postToSave)
+
     }
 
-    private fun uploadImageAndAddPost(imageUri: Uri, postData: Post, author: User) {
+    private fun uploadImageAndAddPost(imageUri: Uri?, postData: Post, author: User) {
         _uiState.update { it.copy(isLoading = true, errorMessage = null) }
         val userId = author.id
         val fileName =
-            "post_images/${userId}/${UUID.randomUUID()}_${imageUri.lastPathSegment ?: "image.jpg"}"
+            "post_images/${userId}/${UUID.randomUUID()}_${imageUri?.lastPathSegment ?: "image.jpg"}"
         val imageStorageRef = storageRef.child(fileName)
 
-        val uploadTask = imageStorageRef.putFile(imageUri)
-        uploadTask.addOnSuccessListener { taskSnapshot ->
+        val uploadTask = imageUri?.let { imageStorageRef.putFile(it) }
+        uploadTask?.addOnSuccessListener { taskSnapshot ->
             imageStorageRef.downloadUrl.addOnSuccessListener { downloadUri ->
                 val downloadUrlString = downloadUri.toString()
 
@@ -192,14 +192,14 @@ class AddViewModel @Inject constructor(
                     )
                 }
             }
-        }.addOnFailureListener { exception ->
+        }?.addOnFailureListener { exception ->
             _uiState.update {
                 it.copy(
                     isLoading = false,
                     errorMessage = "Image upload failed: ${exception.message}"
                 )
             }
-        }.addOnProgressListener { taskSnapshot ->
+        }?.addOnProgressListener { taskSnapshot ->
             val progress = (100.0 * taskSnapshot.bytesTransferred) / taskSnapshot.totalByteCount
             _uiState.update { it.copy(uploadProgress = progress.toInt()) }
         }
