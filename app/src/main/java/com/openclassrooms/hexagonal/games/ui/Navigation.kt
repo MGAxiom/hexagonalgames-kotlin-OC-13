@@ -14,7 +14,6 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.openclassrooms.hexagonal.games.domain.model.Post
 import com.openclassrooms.hexagonal.games.screen.Screen
 import com.openclassrooms.hexagonal.games.screen.account.AccountScreen
 import com.openclassrooms.hexagonal.games.screen.account.AccountViewModel
@@ -39,8 +38,8 @@ fun HexagonalGamesNavHost(
     ) {
         composable(route = Screen.Homefeed.route) {
             HomefeedScreen(
-                onPostClick = { post ->
-                    navHostController.navigate(Screen.Details.route + "/${post.id}")
+                onPostClick = { postId ->
+                    navHostController.navigate(Screen.Details.route + "/${postId}")
                 },
                 onSettingsClick = {
                     navHostController.navigate(Screen.Settings.route)
@@ -96,14 +95,19 @@ fun HexagonalGamesNavHost(
         ) { backStackEntry ->
             PublicationDetailsScreen(
                 onBackClick = { navHostController.navigateUp() },
-                onAddComment = { navHostController.navigate(Screen.Comments.route) }
+                onAddComment = { postId ->
+                    navHostController.navigate(Screen.Comments.route + "/${postId}")
+                }
             )
         }
 
-        composable(route = Screen.Comments.route) {
+        composable(
+            route = Screen.Comments.route + "/{postId}",
+            arguments = listOf(navArgument("postId") { type = NavType.StringType })
+        ) {
             AddCommentsScreen(
                 onBackClick = { navHostController.navigateUp() },
-                onSaveComment = { navHostController.navigateUp() }
+                onSavedComment = { navHostController.navigateUp() }
             )
         }
         composable(route = Screen.Settings.route) {

@@ -7,12 +7,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Done
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FabPosition
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
@@ -29,15 +25,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.openclassrooms.hexagonal.games.R
-import com.openclassrooms.hexagonal.games.domain.model.Post
-import com.openclassrooms.hexagonal.games.ui.state.DetailsUiState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddCommentsScreen(
+    viewModel: AddCommentsViewModel = hiltViewModel(),
     onBackClick: () -> Unit,
-    onSaveComment: () -> Unit,
+    onSavedComment: () -> Unit,
 ) {
 
     val snackbarHostState = remember { SnackbarHostState() }
@@ -60,7 +56,10 @@ fun AddCommentsScreen(
     ) { contentPadding ->
         AddCommentsContent(
             padding = contentPadding,
-            onSaveClick = onSaveComment
+            onSaveClick = { comment ->
+                viewModel.onSaveComment(comment)
+                onSavedComment()
+            }
         )
     }
 }
@@ -68,9 +67,9 @@ fun AddCommentsScreen(
 @Composable
 private fun AddCommentsContent(
     padding: PaddingValues,
-    onSaveClick: () -> Unit,
+    onSaveClick: (String) -> Unit,
 ) {
-    var text = remember { mutableStateOf("") }
+    val text = remember { mutableStateOf("") }
 
     Column(
         modifier = Modifier.padding(padding)
@@ -86,7 +85,7 @@ private fun AddCommentsContent(
         )
         
         Button(
-            onClick = onSaveClick,
+            onClick = { onSaveClick(text.value) },
             enabled = text.value.isNotEmpty() && text.value.isNotBlank(),
             modifier = Modifier
                 .padding(ITEM_PADDING_TOP.dp)
@@ -102,7 +101,7 @@ private fun AddCommentsContent(
 private fun AddCommentsScreenPreview() {
     AddCommentsScreen(
         onBackClick = {},
-        onSaveComment = {}
+        onSavedComment = {}
     )
 }
 

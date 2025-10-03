@@ -1,12 +1,10 @@
 package com.openclassrooms.hexagonal.games.screen.details
 
-import androidx.compose.animation.core.copy
+
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.openclassrooms.hexagonal.games.data.repository.FirestoreRepository
-import com.openclassrooms.hexagonal.games.data.repository.PostRepository
-import com.openclassrooms.hexagonal.games.ui.state.AddUiState
 import com.openclassrooms.hexagonal.games.ui.state.DetailsUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
@@ -23,16 +21,11 @@ class PublicationDetailsViewModel @Inject constructor(
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(DetailsUiState())
     val uiState: StateFlow<DetailsUiState> = _uiState.asStateFlow()
+    val postId: String? = savedStateHandle["postId"]
 
     init {
-        val postId: String? = savedStateHandle["postId"]
-
         if (postId != null) {
             loadPostDetails(postId)
-        } else {
-            _uiState.update {
-                it.copy(errorMessage = "Post ID is missing. Cannot load details.")
-            }
         }
     }
 
@@ -70,3 +63,4 @@ class PublicationDetailsViewModel @Inject constructor(
         }
     }
 }
+
