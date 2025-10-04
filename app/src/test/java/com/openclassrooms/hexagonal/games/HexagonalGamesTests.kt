@@ -393,9 +393,8 @@ class HomefeedViewModelTest {
             val onSuccess = it.getArgument<(List<Post>) -> Unit>(0)
             onSuccess(firestorePosts)
         }
-        whenever(postRepository.posts).thenReturn(flowOf(localPosts))
 
-        viewModel = HomefeedViewModel(postRepository, firestoreRepository)
+        viewModel = HomefeedViewModel(firestoreRepository)
         testDispatcher.scheduler.advanceUntilIdle()
 
         val posts = viewModel.posts.value
